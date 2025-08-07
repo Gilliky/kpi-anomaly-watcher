@@ -1,19 +1,19 @@
-import os, pandas as pd
+import os
+import pandas as pd
 from discord_webhook import DiscordWebhook
 
-THRESHOLD = 3        # 3-Sigma-Regel
+THRESHOLD = 3              # 3-Sigma-Grenze
+CSV_PATH = "data/kpi.csv"  # richtiges Repo-Verzeichnis!
+METRIC   = "ctr"           # oder 'ecpm'
 
-df = pd.read_csv("data.csv", parse_dates=["ts"])          # Colab-Pfad
-metric = "ctr"                                           # oder "ecpm"
+df = pd.read_csv(CSV_PATH, parse_dates=["ts"])
 
-# rolling mean + std (24 h)
-roll = df[metric].rolling(window=24, min_periods=24)
-z_score = (df[metric] - roll.mean()) / roll.std()
+roll   = df[METRIC].rolling(24, min_periods=24)
+zscore = (df[METRIC] - roll.mean()) / roll.std()
 
-# letzte Stunde prüfen
-latest = z_score.iloc[-1]
+latest = zscore.iloc[-1]
 if latest > THRESHOLD:
     DiscordWebhook(
         url=os.getenv("DISCORD_URL"),
-        content=f"⚠️ {metric.upper()}-Spike! Z={latest:.1f}"
+        content=f"⚠️ {METRIC.upper()}-Spike! Z={latest:.1f}"
     ).execute()
