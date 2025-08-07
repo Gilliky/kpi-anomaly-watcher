@@ -1,0 +1,6 @@
+
+pandas
+numpy
+streamlit
+evidently
+discord_webhook
